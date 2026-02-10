@@ -1,0 +1,16 @@
+[
+    {
+        "name": "Charizard",
+        "game": "Ultra Sun",
+        "method": "SOS",
+        "date_caught": "2019-19-05"
+    },
+    {
+        "id": 2,
+        "name": "Charizard",
+        "game": "sun",
+        "method": "SOS",
+        "generation": 7,
+        "date_caught": "\"2019-19-05\""
+    }
+]

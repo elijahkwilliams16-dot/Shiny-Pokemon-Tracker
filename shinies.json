@@ -28,5 +28,25 @@
         "date_caught": "2026-07-01",
         "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png",
         "shiny_sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/132.png"
+    },
+    {
+        "id": 5,
+        "name": "Latias",
+        "game": "heartgold",
+        "method": "Roaming",
+        "generation": 4,
+        "date_caught": "2026-07-22",
+        "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/380.png",
+        "shiny_sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/380.png"
+    },
+    {
+        "id": 6,
+        "name": "Zacian",
+        "game": "sword",
+        "method": "Mystery Gift",
+        "generation": 8,
+        "date_caught": "2026-07-08",
+        "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/888.png",
+        "shiny_sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/888.png"
     }
 ]

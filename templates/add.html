@@ -3,89 +3,112 @@
 
 <head>
 
-<title>Add Shiny</title>
+    <title>Add Shiny Pokémon</title>
 
-<link rel="stylesheet" href="/static/style.css">
+    <!-- Connects this page to our CSS file -->
+    <link rel="stylesheet" href="/static/style.css">
 
 </head>
 
-
 <body>
 
+    <!-- Main container for the page -->
+    <div class="container">
 
-<div class="container">
+        <h1>✨ Add Shiny Pokémon ✨</h1>
 
+        <!--
+            class="add-form"
+            This lets CSS style the entire form as a grid.
+        -->
+        <form method="POST" class="add-form">
 
-<h1>✨ Add Shiny Pokémon</h1>
+            <!-- Pokémon Name -->
+            <div class="form-group">
 
+                <label for="name">Pokémon Name</label>
 
-<form method="POST">
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                >
 
+            </div>
 
-<label>Pokémon Name:</label>
+            <!-- Game -->
+            <div class="form-group">
 
-<input 
-type="text"
-name="name"
-required
->
+                <label for="game">Game</label>
 
+                <select
+                    id="game"
+                    name="game"
+                    required
+                >
 
-<br><br>
+                    <option value="">Select a Game</option>
 
+                    <!--
+                        Flask automatically creates one option
+                        for every game inside GAME_TO_GEN.
+                    -->
+                    {% for game in games %}
 
-<label>Game:</label>
+                        <option value="{{ game }}">
+                            {{ game.title() }}
+                        </option>
 
-<input
-type="text"
-name="game"
-required
->
+                    {% endfor %}
 
+                </select>
 
-<br><br>
+            </div>
 
+            <!-- Method -->
+            <div class="form-group">
 
-<label>Method:</label>
+                <label for="method">Method</label>
 
-<input
-type="text"
-name="method"
-required
->
+                <input
+                    type="text"
+                    id="method"
+                    name="method"
+                    placeholder="Masuda, Soft Reset, Sandwich..."
+                    required
+                >
 
+            </div>
 
-<br><br>
+            <!-- Date -->
+            <div class="form-group">
 
+                <label for="date">Date Caught</label>
 
-<label>Date Caught:</label>
+                <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    required
+                >
 
-<input
-type="date"
-name="date"
-required
->
+            </div>
 
+            <!-- Submit Button -->
+            <button type="submit">
+                ✨ Add Shiny
+            </button>
 
-<br><br>
+        </form>
 
+        <br>
 
-<button type="submit">
-Add Shiny
-</button>
+        <a href="/">
+            ← Back Home
+        </a>
 
-
-</form>
-
-
-
-<a href="/">
-Back Home
-</a>
-
-
-</div>
-
+    </div>
 
 </body>
 

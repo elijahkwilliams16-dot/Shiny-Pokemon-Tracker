@@ -93,7 +93,12 @@ def add():
 
 
 
-    return render_template("add.html")
+    games = sorted(GAME_TO_GEN.keys())
+
+    return render_template(
+        "add.html",
+        games=games
+)
 
 @app.route("/delete/<int:shiny_id>", methods=["POST"])
 def delete(shiny_id):

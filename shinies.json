@@ -1,18 +1,32 @@
 [
     {
-        "id": 1,
+        "id": 2,
         "name": "Charizard",
         "game": "Ultra Sun",
         "method": "SOS",
-        "generation": 7,
-        "date_caught": "2019-19-05"
+        "generation": "Unknown",
+        "date_caught": "2019-09-16",
+        "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png",
+        "shiny_sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/6.png"
     },
     {
-        "id": 2,
-        "name": "Charizard",
-        "game": "sun",
-        "method": "SOS",
-        "generation": 7,
-        "date_caught": "\"2019-19-05\""
+        "id": 3,
+        "name": "Espeon",
+        "game": "silver",
+        "method": "randome encounter",
+        "generation": 2,
+        "date_caught": "2026-07-21",
+        "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png",
+        "shiny_sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/196.png"
+    },
+    {
+        "id": 4,
+        "name": "Ditto",
+        "game": "ruby",
+        "method": "soft reset",
+        "generation": 3,
+        "date_caught": "2026-07-01",
+        "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png",
+        "shiny_sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/132.png"
     }
 ]

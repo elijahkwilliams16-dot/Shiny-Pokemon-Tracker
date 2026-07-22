@@ -17,3 +17,18 @@ across different games and generations.
 - Search and filtering
 - Web interface
 - AI-generated summaries
+
+
+##Shiny-Pokemon-Tracker/
+# │
+# ├── app.py              <-- Flask website
+# ├── tracker.py          <-- Your logic
+# ├── shinies.json
+# │
+# ├── templates/
+# │   ├── index.html
+# │   ├── add.html
+# │   └── stats.html
+# │
+# └── static/
+#     └── style.css

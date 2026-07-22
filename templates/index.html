@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiny Pokémon Tracker</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>✨ Shiny Pokémon Tracker</h1>
+
+        <h2>Total Shinies: {{ shinies|length }}</h2>
+
+        <a href="/add">
+            <button>➕ Add Shiny</button>
+        </a>
+
+        <hr>
+
+        {% if shinies %}
+
+            {% for shiny in shinies %}
+
+                <div class="card">
+
+                    {% if shiny.get("shiny_sprite") %}
+                        <img
+                            src="{{ shiny['shiny_sprite'] }}"
+                            alt="{{ shiny['name'] }}"
+                            width="150">
+                    {% else %}
+                        <p>No sprite available.</p>
+                    {% endif %}
+
+                    <h2>⭐ {{ shiny["name"] }}</h2>
+
+                    <p><strong>Game:</strong> {{ shiny["game"] }}</p>
+
+                    <p><strong>Generation:</strong> {{ shiny["generation"] }}</p>
+
+                    <p><strong>Method:</strong> {{ shiny["method"] }}</p>
+
+                    <p><strong>Date Caught:</strong> {{ shiny["date_caught"] }}</p>
+
+                    <form
+                        action="/delete/{{ shiny['id'] }}"
+                        method="POST"
+                        onsubmit="return confirm('Delete this shiny?');">
+
+                        <button type="submit">
+                            🗑 Delete
+                        </button>
+
+                    </form>
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No shiny Pokémon recorded yet!</p>
+
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>

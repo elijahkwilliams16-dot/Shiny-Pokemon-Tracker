@@ -26,6 +26,80 @@ GAME_TO_GEN = {
     "legends: z-a": 9,
 }
 
+GAME_TO_VERSION = {
+
+    # ==========================
+    # Generation I
+    # ==========================
+    "red": ("generation-i", "red-blue"),
+    "blue": ("generation-i", "red-blue"),
+    "yellow": ("generation-i", "yellow"),
+
+    # ==========================
+    # Generation II
+    # ==========================
+    "gold": ("generation-ii", "gold"),
+    "silver": ("generation-ii", "silver"),
+    "crystal": ("generation-ii", "crystal"),
+
+    # ==========================
+    # Generation III
+    # ==========================
+    "ruby": ("generation-iii", "ruby-sapphire"),
+    "sapphire": ("generation-iii", "ruby-sapphire"),
+    "emerald": ("generation-iii", "emerald"),
+    "fire red": ("generation-iii", "firered-leafgreen"),
+    "leaf green": ("generation-iii", "firered-leafgreen"),
+
+    # ==========================
+    # Generation IV
+    # ==========================
+    "diamond": ("generation-iv", "diamond-pearl"),
+    "pearl": ("generation-iv", "diamond-pearl"),
+    "platinum": ("generation-iv", "platinum"),
+    "heartgold": ("generation-iv", "heartgold-soulsilver"),
+    "soulsilver": ("generation-iv", "heartgold-soulsilver"),
+
+    # ==========================
+    # Generation V
+    # ==========================
+    "black": ("generation-v", "black-white"),
+    "white": ("generation-v", "black-white"),
+    "black 2": ("generation-v", "black-2-white-2"),
+    "white 2": ("generation-v", "black-2-white-2"),
+
+    # ==========================
+    # Generation VI
+    # ==========================
+    "x": ("generation-vi", "x-y"),
+    "y": ("generation-vi", "x-y"),
+    "omega ruby": ("generation-vi", "omegaruby-alphasapphire"),
+    "alpha sapphire": ("generation-vi", "omegaruby-alphasapphire"),
+
+    # ==========================
+    # Generation VII
+    # ==========================
+    "sun": ("generation-vii", "ultra-sun-ultra-moon"),
+    "moon": ("generation-vii", "ultra-sun-ultra-moon"),
+    "ultra sun": ("generation-vii", "ultra-sun-ultra-moon"),
+    "ultra moon": ("generation-vii", "ultra-sun-ultra-moon"),
+    "let's go, pikachu": ("generation-vii", "icons"),
+    "let's go, eevee": ("generation-vii", "icons"),
+
+    # ==========================
+    # Generation VIII
+    # ==========================
+    "sword": ("generation-viii", "icons"),
+    "shield": ("generation-viii", "icons"),
+    "legends: arceus": ("generation-viii", "icons"),
+
+    # ==========================
+    # Generation IX
+    # ==========================
+    "scarlet": ("generation-ix", "scarlet-violet"),
+    "violet": ("generation-ix", "scarlet-violet"),
+    "legends: z-a": ("generation-ix", "scarlet-violet")
+}
 
 def load_shinies():
     try:
@@ -41,9 +115,61 @@ def save_shinies(shinies):
         json.dump(shinies, file, indent=4)
 
 
+
+
 # ==========================
 # POKEAPI FUNCTIONS
 # ==========================
+def get_pokemon_generation(name):
+    pokemon_name = name.lower().strip()
+
+    url = f"https://pokeapi.co/api/v2/pokemon-species/{pokemon_name}"
+
+    try: 
+        response = requests.get(url)
+
+        if response.status_code !=200:
+            return None 
+
+        data = response.json()
+
+        generation_name = data["generation"]["name"]
+
+        generation_map = {
+            "generation-i": 1,
+            "generation-ii": 2,
+            "generation-iii": 3,
+            "generation-iv": 4,
+            "generation-v": 5,
+            "generation-vi": 6,
+            "generation-vii": 7,
+            "generation-viii": 8,
+            "generation-ix": 9
+        }
+
+        return generation_map[generation_name]
+
+    except requests.exceptions.RequestException:
+        return None    
+
+def validate_game(name, game):
+    pokemon_generation = get_pokemon_generation(name)
+
+    if pokemon_generation is None:
+        return False, "Pokémon not found."
+
+    game_generation = GAME_TO_GEN.get(game.lower())
+
+    if game_generation is None:
+        return False, "Unknown game."
+
+    if pokemon_generation > game_generation:
+        return (
+            False,
+            f"{name} was introduced in Generation {pokemon_generation}."
+        )
+
+    return True, ""
 
 def get_pokemon_data(name):
     pokemon_name = name.lower().strip()
@@ -92,6 +218,37 @@ def get_pokemon_data(name):
             "valid": False
         }
 
+def get_game_sprite(name, game):
+
+    pokemon_name = name.lower().strip()
+
+    url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name}"
+
+    try:
+        response = requests.get(url)
+
+        if response.status_code != 200:
+            return None
+
+        data = response.json()
+
+        if game.lower() not in GAME_TO_VERSION:
+            return None
+
+        generation, version = GAME_TO_VERSION[game.lower()]
+
+        sprite = (
+            data["sprites"]
+                ["versions"]
+                [generation]
+                [version]
+                .get("front_shiny")
+        )
+
+        return sprite
+
+    except (KeyError, requests.exceptions.RequestException):
+        return None
 
 # ==========================
 # ADD SHINY
@@ -114,6 +271,11 @@ def add_shiny(shinies):
     game = input("Game caught in: ").strip()
     game_key = game.lower()
     generation = GAME_TO_GEN.get(game_key, "Unknown")
+    game_sprite = get_game_sprite(name, game)
+
+    if game_sprite is None:
+        game_sprite = pokemon_data["shiny_sprite"]
+
 
     if generation == "Unknown":
         print("Game not recognized — generation set to Unknown.")
@@ -136,18 +298,18 @@ def add_shiny(shinies):
             print("⚠️ This shiny is already recorded.")
             return
 
+    valid, message = validate_game(name, game)
+    if not valid:
+        print(message)
+        return
 
     shiny = {
-
-        "id": next_id,
-        "name": name,
-        "game": game,
-        "method": method,
-        "generation": generation,
-        "date_caught": date,
-        "sprite": pokemon_data["sprite"],
-        "shiny_sprite": pokemon_data["shiny_sprite"]
-
+    "id": next_id,
+    "name": name,
+    "game": game,
+    "method": method,
+    "generation": generation,
+    "date_caught": date
     }
 
 

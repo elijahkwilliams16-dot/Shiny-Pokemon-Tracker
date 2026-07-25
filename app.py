@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect
-from tracker import load_shinies, save_shinies, get_pokemon_data, GAME_TO_GEN
+from tracker import get_game_sprite, load_shinies, save_shinies, get_pokemon_data, GAME_TO_GEN
 
 
 app = Flask(__name__)
@@ -10,11 +10,30 @@ def home():
 
     shinies = load_shinies()
 
+    for shiny in shinies:
+
+        sprite = get_game_sprite(
+            shiny["name"],
+            shiny["game"]
+        )
+
+        if sprite is None:
+
+            pokemon = get_pokemon_data(
+                shiny["name"]
+            )
+
+            sprite = pokemon["shiny_sprite"]
+
+        shiny["shiny_sprite"] = sprite
+
     return render_template(
         "index.html",
         shinies=shinies
     )
 
+if __name__ == "__main__":
+    app.run(debug=True)
 
 
 @app.route("/add", methods=["GET", "POST"])

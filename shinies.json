@@ -58,5 +58,35 @@
         "date_caught": "2026-07-25",
         "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/384.png",
         "shiny_sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/384.png"
+    },
+    {
+        "id": 8,
+        "name": "Rayquaza",
+        "game": "ultra sun",
+        "method": "Soft Reset",
+        "generation": 7,
+        "date_caught": "2026-07-24",
+        "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/384.png",
+        "shiny_sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/384.png"
+    },
+    {
+        "id": 9,
+        "name": "Cresselia",
+        "game": "alpha sapphire",
+        "method": "Soft Reset",
+        "generation": 6,
+        "date_caught": "2026-07-31",
+        "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/488.png",
+        "shiny_sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/488.png"
+    },
+    {
+        "id": 10,
+        "name": "Entei",
+        "game": "heartgold",
+        "method": "Roaming",
+        "generation": 4,
+        "date_caught": "2024-06-12",
+        "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/244.png",
+        "shiny_sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/244.png"
     }
 ]

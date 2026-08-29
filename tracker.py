@@ -121,17 +121,23 @@ def save_shinies(shinies):
 # POKEAPI FUNCTIONS
 # ==========================
 def get_pokemon_generation(name):
+
     pokemon_name = name.lower().strip()
 
     url = f"https://pokeapi.co/api/v2/pokemon-species/{pokemon_name}"
 
-    try: 
-        response = requests.get(url)
+    try:
 
-        if response.status_code !=200:
-            return None 
+        response = requests.get(url, timeout=10)
+
+        if response.status_code != 200:
+            return None
 
         data = response.json()
+
+        # Make sure the API actually returned generation information
+        if "generation" not in data:
+            return None
 
         generation_name = data["generation"]["name"]
 
@@ -147,23 +153,38 @@ def get_pokemon_generation(name):
             "generation-ix": 9
         }
 
-        return generation_map[generation_name]
+        return generation_map.get(generation_name)
 
     except requests.exceptions.RequestException:
-        return None    
+
+        return None  
+
+
 
 def validate_game(name, game):
+
     pokemon_generation = get_pokemon_generation(name)
 
     if pokemon_generation is None:
-        return False, "Pokémon not found."
 
-    game_generation = GAME_TO_GEN.get(game.lower())
+        return (
+            False,
+            "Could not determine the Pokémon's generation. Please try again."
+        )
+
+    game_generation = GAME_TO_GEN.get(
+        game.lower()
+    )
 
     if game_generation is None:
-        return False, "Unknown game."
+
+        return (
+            False,
+            "Unknown game."
+        )
 
     if pokemon_generation > game_generation:
+
         return (
             False,
             f"{name} was introduced in Generation {pokemon_generation}."
@@ -200,6 +221,7 @@ def get_pokemon_data(name):
 
             return {
                 "valid": True,
+                "id": data["id"],
                 "sprite": normal_sprite,
                 "shiny_sprite": shiny_sprite
             }

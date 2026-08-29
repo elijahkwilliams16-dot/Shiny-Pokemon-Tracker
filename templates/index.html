@@ -1,74 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Shiny Pokémon Tracker</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
+
 </head>
+
 
 <body>
 
-    <div class="container">
 
-        <h1>✨ Shiny Pokémon Tracker ✨</h1>
+<div class="container">
 
-        <h2>Total Shinies: {{ shinies|length }}</h2>
 
-        <a href="/add">
-            <button>➕ Add Shiny</button>
+    <h1>✨ My Shiny Pokémon</h1>
+
+
+    <div class="top-buttons">
+
+        <a href="/add" class="add-button">
+            ➕ Add Shiny
         </a>
 
-        <hr>
+    </div>
 
-        {% if shinies %}
+
+    {% if shinies %}
+
+        <div class="pokemon-grid">
 
             {% for shiny in shinies %}
 
                 <div class="card">
 
-                    {% if shiny.get("shiny_sprite") %}
+
+                    <!-- Pokémon Sprite -->
+
+                    {% if shiny.pokemon.shiny_sprite_url %}
+
                         <img
-                            src="{{ shiny['shiny_sprite'] }}"
-                            alt="{{ shiny['name'] }}"
-                            width="150">
-                    {% else %}
-                        <p>No sprite available.</p>
+                            src="{{ shiny.pokemon.shiny_sprite_url }}"
+                            alt="{{ shiny.pokemon.name }}"
+                        >
+
                     {% endif %}
 
-                    <h2> {{ shiny["name"] }}</h2>
 
-                    <p><strong>Game:</strong> {{ shiny["game"] }}</p>
+                    <!-- Pokémon Name -->
 
-                    <p><strong>Generation:</strong> {{ shiny["generation"] }}</p>
+                    <h2>
+                        ✨ {{ shiny.pokemon.name.title() }}
+                    </h2>
 
-                    <p><strong>Method:</strong> {{ shiny["method"] }}</p>
 
-                    <p><strong>Date Caught:</strong> {{ shiny["date_caught"] }}</p>
+                    <!-- Game -->
+
+                    <p>
+                        <strong>Game:</strong>
+                        {{ shiny.game.name }}
+                    </p>
+
+
+                    <!-- Generation -->
+
+                    <p>
+                        <strong>Generation:</strong>
+                        {{ shiny.game.generation }}
+                    </p>
+
+
+                    <!-- Method -->
+
+                    <p>
+                        <strong>Method:</strong>
+                        {{ shiny.method }}
+                    </p>
+
+
+                    <!-- Date -->
+
+                    <p>
+                        <strong>Date Caught:</strong>
+                        {{ shiny.date_caught }}
+                    </p>
+
+
+                    <!-- Delete -->
 
                     <form
-                        action="/delete/{{ shiny['id'] }}"
                         method="POST"
-                        onsubmit="return confirm('Delete this shiny?');">
+                        action="/delete/{{ shiny.id }}"
+                    >
 
-                        <button type="submit">
-                            🗑 Delete
+                        <button
+                            type="submit"
+                            class="delete-button"
+                        >
+                            🗑️ Delete
                         </button>
 
                     </form>
+
+
                 </div>
 
             {% endfor %}
 
-        {% else %}
+        </div>
 
-            <p>No shiny Pokémon recorded yet!</p>
 
-        {% endif %}
+    {% else %}
 
-    </div>
+        <div class="empty-message">
+
+            <h2>No Shiny Pokémon Yet!</h2>
+
+            <p>
+                Add your first shiny Pokémon to get started.
+            </p>
+
+            <a href="/add" class="add-button">
+                ➕ Add Your First Shiny
+            </a>
+
+        </div>
+
+    {% endif %}
+
+
+</div>
+
 
 </body>
 

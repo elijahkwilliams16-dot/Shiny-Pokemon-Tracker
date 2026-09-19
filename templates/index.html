@@ -5,28 +5,222 @@
 
     <title>Shiny Pokémon Tracker</title>
 
-    <link rel="stylesheet" href="/static/style.css">
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
 
 </head>
 
-
 <body>
-
 
 <div class="container">
 
 
-    <h1>✨ My Shiny Pokémon</h1>
+    <!-- ==========================
+         HEADER
+    ========================== -->
+
+    <header class="header">
+
+        <div>
+
+            <h1>
+                ✨ Shiny Tracker
+            </h1>
+
+            <p>
+                Track your shiny Pokémon across your favorite games.
+            </p>
+
+        </div>
 
 
-    <div class="top-buttons">
-
-        <a href="/add" class="add-button">
+        <a
+            href="/add"
+            class="add-button"
+        >
             ➕ Add Shiny
         </a>
 
+    </header>
+
+
+    <!-- ==========================
+         STATS
+    ========================== -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <span class="stat-number">
+                {{ shinies|length }}
+            </span>
+
+            <span class="stat-label">
+                Total Shinies
+            </span>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span class="stat-number">
+                {{ shinies|map(attribute='game.name')|unique|list|length }}
+            </span>
+
+            <span class="stat-label">
+                Games
+            </span>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span class="stat-number">
+                {{ shinies|map(attribute='game.generation')|unique|list|length }}
+            </span>
+
+            <span class="stat-label">
+                Generations
+            </span>
+
+        </div>
+
     </div>
 
+
+    <!-- ==========================
+         SEARCH & FILTERS
+    ========================== -->
+
+    <form
+        method="GET"
+        action="/"
+        class="filter-form"
+    >
+
+        <!-- Search -->
+
+        <div class="search-box">
+
+            <label for="search">
+                Search Pokémon
+            </label>
+
+            <input
+                type="text"
+                id="search"
+                name="search"
+                value="{{ search }}"
+                placeholder="Search Pokémon..."
+            >
+
+        </div>
+
+
+        <!-- Game -->
+
+        <div class="filter-group">
+
+            <label for="game">
+                Game
+            </label>
+
+            <select
+                id="game"
+                name="game"
+            >
+
+                <option value="">
+                    All Games
+                </option>
+
+                {% for game in games %}
+
+                    <option
+                        value="{{ game.name }}"
+                        {% if game_filter == game.name %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ game.name.title() }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- Generation -->
+
+        <div class="filter-group">
+
+            <label for="generation">
+                Generation
+            </label>
+
+            <select
+                id="generation"
+                name="generation"
+            >
+
+                <option value="">
+                    All Generations
+                </option>
+
+                {% for generation in generations %}
+
+                    <option
+                        value="{{ generation }}"
+                        {% if generation_filter == generation|string %}
+                            selected
+                        {% endif %}
+                    >
+                        Generation {{ generation }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- Search Button -->
+
+        <button
+            type="submit"
+            class="filter-button"
+        >
+            🔎 Search
+        </button>
+
+
+        <!-- Clear -->
+
+        {% if search or game_filter or generation_filter %}
+
+            <a
+                href="/"
+                class="clear-button"
+            >
+                Clear
+            </a>
+
+        {% endif %}
+
+    </form>
+
+
+    <!-- ==========================
+         RESULTS
+    ========================== -->
 
     {% if shinies %}
 
@@ -37,19 +231,23 @@
                 <div class="card">
 
 
-                    <!-- Pokémon Sprite -->
+                    <!-- Sprite -->
 
-                    {% if shiny.pokemon.shiny_sprite_url %}
+                    <div class="sprite-container">
 
-                        <img
-                            src="{{ shiny.pokemon.shiny_sprite_url }}"
-                            alt="{{ shiny.pokemon.name }}"
-                        >
+                        {% if shiny.shiny_sprite_url %}
 
-                    {% endif %}
+                            <img
+                                src="{{ shiny.shiny_sprite_url }}"
+                                alt="{{ shiny.pokemon.name }} shiny"
+                            >
+
+                        {% endif %}
+
+                    </div>
 
 
-                    <!-- Pokémon Name -->
+                    <!-- Name -->
 
                     <h2>
                         ✨ {{ shiny.pokemon.name.title() }}
@@ -58,34 +256,62 @@
 
                     <!-- Game -->
 
-                    <p>
-                        <strong>Game:</strong>
-                        {{ shiny.game.name }}
-                    </p>
+                    <div class="info-row">
+
+                        <span class="label">
+                            Game
+                        </span>
+
+                        <span>
+                            {{ shiny.game.name }}
+                        </span>
+
+                    </div>
 
 
                     <!-- Generation -->
 
-                    <p>
-                        <strong>Generation:</strong>
-                        {{ shiny.game.generation }}
-                    </p>
+                    <div class="info-row">
+
+                        <span class="label">
+                            Generation
+                        </span>
+
+                        <span>
+                            {{ shiny.game.generation }}
+                        </span>
+
+                    </div>
 
 
                     <!-- Method -->
 
-                    <p>
-                        <strong>Method:</strong>
-                        {{ shiny.method }}
-                    </p>
+                    <div class="info-row">
+
+                        <span class="label">
+                            Method
+                        </span>
+
+                        <span>
+                            {{ shiny.method }}
+                        </span>
+
+                    </div>
 
 
                     <!-- Date -->
 
-                    <p>
-                        <strong>Date Caught:</strong>
-                        {{ shiny.date_caught }}
-                    </p>
+                    <div class="info-row">
+
+                        <span class="label">
+                            Caught
+                        </span>
+
+                        <span>
+                            {{ shiny.date_caught }}
+                        </span>
+
+                    </div>
 
 
                     <!-- Delete -->
@@ -114,16 +340,29 @@
 
     {% else %}
 
+        <!-- ==========================
+             NO RESULTS
+        ========================== -->
+
         <div class="empty-message">
 
-            <h2>No Shiny Pokémon Yet!</h2>
+            <div class="empty-icon">
+                🔎
+            </div>
+
+            <h2>
+                No Shinies Found
+            </h2>
 
             <p>
-                Add your first shiny Pokémon to get started.
+                Try changing your search or filters.
             </p>
 
-            <a href="/add" class="add-button">
-                ➕ Add Your First Shiny
+            <a
+                href="/"
+                class="add-button"
+            >
+                Clear Filters
             </a>
 
         </div>
@@ -132,7 +371,6 @@
 
 
 </div>
-
 
 </body>
 

@@ -1,9 +1,19 @@
-from flask import Flask, render_template, request, redirect
+
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect
+)
 
 from config import Config
 from extensions import db
 
-from models import Shiny, Pokemon, Game
+from models import (
+    Shiny,
+    Pokemon,
+    Game
+)
 
 from tracker import (
     get_pokemon_data,
@@ -11,9 +21,12 @@ from tracker import (
     get_game_sprite,
     GAME_TO_GEN,
     validate_game
-    
 )
 
+
+# =========================================================
+# FLASK SETUP
+# =========================================================
 
 app = Flask(__name__)
 
@@ -22,111 +35,329 @@ app.config.from_object(Config)
 db.init_app(app)
 
 
-# ==========================
+# =========================================================
 # HOME
-# ==========================
+# =========================================================
 
 @app.route("/")
 def home():
 
-    shinies = Shiny.query.all()
+    # -----------------------------------------------------
+    # GET FILTER VALUES
+    # -----------------------------------------------------
+
+    search = request.args.get(
+        "search",
+        ""
+    ).strip()
+
+    game_filter = request.args.get(
+        "game",
+        ""
+    ).strip()
+
+    generation_filter = request.args.get(
+        "generation",
+        ""
+    ).strip()
+
+
+    # -----------------------------------------------------
+    # START DATABASE QUERY
+    # -----------------------------------------------------
+
+    query = Shiny.query
+
+
+    # -----------------------------------------------------
+    # SEARCH BY POKÉMON NAME
+    # -----------------------------------------------------
+
+    if search:
+
+        query = query.join(
+            Pokemon
+        ).filter(
+            Pokemon.name.ilike(
+                f"%{search.lower()}%"
+            )
+        )
+
+
+    # -----------------------------------------------------
+    # FILTER BY GAME
+    # -----------------------------------------------------
+
+    if game_filter:
+
+        query = query.join(
+            Game
+        ).filter(
+            Game.name == game_filter
+        )
+
+
+    # -----------------------------------------------------
+    # FILTER BY GENERATION
+    # -----------------------------------------------------
+
+    if generation_filter:
+
+        if not game_filter:
+
+            query = query.join(
+                Game
+            )
+
+        query = query.filter(
+            Game.generation == int(
+                generation_filter
+            )
+        )
+
+
+    # -----------------------------------------------------
+    # GET RESULTS
+    # -----------------------------------------------------
+
+    shinies = query.all()
+
+
+    # -----------------------------------------------------
+    # GET FILTER OPTIONS
+    # -----------------------------------------------------
+
+    games = Game.query.order_by(
+        Game.name
+    ).all()
+
+
+    generations = db.session.query(
+        Game.generation
+    ).distinct().order_by(
+        Game.generation
+    ).all()
+
+
+    generations = [
+        generation[0]
+        for generation in generations
+    ]
+
+
+    # -----------------------------------------------------
+    # RENDER PAGE
+    # -----------------------------------------------------
 
     return render_template(
         "index.html",
-        shinies=shinies
+
+        shinies=shinies,
+
+        games=games,
+
+        generations=generations,
+
+        search=search,
+
+        game_filter=game_filter,
+
+        generation_filter=generation_filter
     )
 
 
-# ==========================
+# =========================================================
 # ADD SHINY
-# ==========================
+# =========================================================
 
-@app.route("/add", methods=["GET", "POST"])
+@app.route(
+    "/add",
+    methods=["GET", "POST"]
+)
 def add():
+
+    # =====================================================
+    # POST
+    # =====================================================
 
     if request.method == "POST":
 
-        name = request.form["name"].strip().title()
+        # -------------------------------------------------
+        # GET FORM DATA
+        # -------------------------------------------------
 
-        game = request.form["game"].strip()
+        name = request.form[
+            "name"
+        ].strip().title()
 
-        method = request.form["method"].strip()
+        game = request.form[
+            "game"
+        ].strip()
 
-        date = request.form["date"]
+        method = request.form[
+            "method"
+        ].strip()
 
-
-        # Check Pokémon using PokéAPI
-
-        pokemon_data = get_pokemon_data(name)
-
-        if not pokemon_data["valid"]:
-
-            return "❌ Pokémon not found"
-
-
-        # Check if Pokémon can exist in this game
-
-        valid, message = validate_game(
-            name,
-            game
-        )
-
-        if not valid:
-
-            return f"❌ {message}"
+        date = request.form[
+            "date"
+        ]
 
 
-        # Get game generation
-
-        generation = GAME_TO_GEN.get(
-            game.lower()
-        )
-
-        if generation is None:
-
-            return "❌ Unknown game"
-
-
-        # ==========================
-        # FIND POKÉMON
-        # ==========================
+        # -------------------------------------------------
+        # FIND POKÉMON IN DATABASE
+        # -------------------------------------------------
 
         pokemon = Pokemon.query.filter_by(
             name=name.lower()
         ).first()
 
 
-        # Create Pokémon if it doesn't exist
+        # -------------------------------------------------
+        # POKÉMON NOT IN DATABASE
+        # -------------------------------------------------
 
         if pokemon is None:
 
-            pokemon = Pokemon(
-
-                pokedex_id=pokemon_data["id"],
-
-                name=name.lower(),
-
-                generation=get_pokemon_generation(name),
-
-                sprite_url=pokemon_data["sprite"],
-
-                shiny_sprite_url=pokemon_data["shiny_sprite"]
-
+            pokemon_data = get_pokemon_data(
+                name
             )
 
-            db.session.add(pokemon)
+
+            # ---------------------------------------------
+            # CHECK IF POKÉMON EXISTS
+            # ---------------------------------------------
+
+            if not pokemon_data["valid"]:
+
+                return (
+                    "❌ Pokémon not found"
+                )
 
 
-        # ==========================
-        # FIND GAME
-        # ==========================
+            # ---------------------------------------------
+            # GET GENERATION
+            # ---------------------------------------------
+
+            pokemon_generation = (
+                get_pokemon_generation(
+                    name
+                )
+            )
+
+
+            if pokemon_generation is None:
+
+                return (
+                    "❌ Could not determine "
+                    "Pokémon generation"
+                )
+
+
+            # ---------------------------------------------
+            # CREATE POKÉMON RECORD
+            # ---------------------------------------------
+
+            pokemon = Pokemon(
+
+                pokedex_id=
+                    pokemon_data["id"],
+
+                name=
+                    name.lower(),
+
+                generation=
+                    pokemon_generation,
+
+                sprite_url=
+                    pokemon_data["sprite"],
+
+                shiny_sprite_url=
+                    pokemon_data[
+                        "shiny_sprite"
+                    ]
+            )
+
+
+            db.session.add(
+                pokemon
+            )
+
+
+        # -------------------------------------------------
+        # POKÉMON ALREADY EXISTS
+        # -------------------------------------------------
+
+        else:
+
+            pokemon_generation = (
+                pokemon.generation
+            )
+
+
+            pokemon_data = {
+
+                "valid": True,
+
+                "id":
+                    pokemon.pokedex_id,
+
+                "sprite":
+                    pokemon.sprite_url,
+
+                "shiny_sprite":
+                    pokemon.shiny_sprite_url
+
+            }
+
+
+        # -------------------------------------------------
+        # VALIDATE GAME
+        # -------------------------------------------------
+
+        valid, message = validate_game(
+
+            name,
+
+            game,
+
+            pokemon_generation
+
+        )
+
+
+        if not valid:
+
+            return f"❌ {message}"
+
+
+        # -------------------------------------------------
+        # GET GAME GENERATION
+        # -------------------------------------------------
+
+        generation = GAME_TO_GEN.get(
+            game.lower()
+        )
+
+
+        if generation is None:
+
+            return (
+                "❌ Unknown game"
+            )
+
+
+        # -------------------------------------------------
+        # FIND GAME IN DATABASE
+        # -------------------------------------------------
 
         game_record = Game.query.filter_by(
             name=game
         ).first()
 
 
-        # Create game if it doesn't exist
+        # -------------------------------------------------
+        # GAME DOES NOT EXIST
+        # -------------------------------------------------
 
         if game_record is None:
 
@@ -138,65 +369,120 @@ def add():
 
             )
 
-            db.session.add(game_record)
+            db.session.add(
+                game_record
+            )
 
 
-        # ==========================
-        # DUPLICATE CHECK
-        # ==========================
+        # -------------------------------------------------
+        # CHECK FOR DUPLICATE
+        # -------------------------------------------------
 
         duplicate = Shiny.query.filter_by(
 
-            pokemon=pokemon,
+            pokemon_id=pokemon.id,
 
-            game=game_record
+            game_id=game_record.id
 
         ).first()
 
 
         if duplicate:
 
-            return "⚠️ This shiny is already recorded."
+            return (
+                "⚠️ This shiny is "
+                "already recorded."
+            )
 
 
-        # ==========================
-        # CREATE SHINY
-        # ==========================
+        # -------------------------------------------------
+        # GET GAME-SPECIFIC SPRITE
+        # -------------------------------------------------
 
-        shiny = Shiny(
+        game_sprite = get_game_sprite(
 
-            pokemon=pokemon,
+            name,
 
-            game=game_record,
-
-            method=method,
-
-            date_caught=date
+            game
 
         )
 
-        db.session.add(shiny)
+
+        # -------------------------------------------------
+        # FALLBACK SPRITE
+        # -------------------------------------------------
+
+        if game_sprite is None:
+
+            game_sprite = (
+                pokemon_data[
+                    "shiny_sprite"
+                ]
+            )
+
+
+        # -------------------------------------------------
+        # CREATE SHINY
+        # -------------------------------------------------
+
+        shiny = Shiny(
+
+            pokemon_id=
+                pokemon.id,
+
+            game_id=
+                game_record.id,
+
+            method=
+                method,
+
+            date_caught=
+                date,
+
+            shiny_sprite_url=
+                game_sprite
+
+        )
+
+
+        db.session.add(
+            shiny
+        )
+
+
+        # -------------------------------------------------
+        # SAVE TO DATABASE
+        # -------------------------------------------------
 
         db.session.commit()
 
 
+        # -------------------------------------------------
+        # RETURN HOME
+        # -------------------------------------------------
+
         return redirect("/")
 
 
-    # GET request
+    # =====================================================
+    # GET
+    # =====================================================
 
-    games = sorted(GAME_TO_GEN.keys())
+    games = sorted(
+        GAME_TO_GEN.keys()
+    )
 
 
     return render_template(
         "add.html",
+
         games=games
     )
 
 
-# ==========================
+# =========================================================
 # DELETE SHINY
-# ==========================
+# =========================================================
 
 @app.route(
     "/delete/<int:shiny_id>",
@@ -212,7 +498,9 @@ def delete(shiny_id):
 
     if shiny:
 
-        db.session.delete(shiny)
+        db.session.delete(
+            shiny
+        )
 
         db.session.commit()
 
@@ -220,9 +508,9 @@ def delete(shiny_id):
     return redirect("/")
 
 
-# ==========================
-# START APP
-# ==========================
+# =========================================================
+# START APPLICATION
+# =========================================================
 
 if __name__ == "__main__":
 
@@ -231,4 +519,6 @@ if __name__ == "__main__":
         db.create_all()
 
 
-    app.run(debug=True)
+    app.run(
+        debug=True
+    )

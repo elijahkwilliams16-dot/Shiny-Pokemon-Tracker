@@ -2,113 +2,300 @@
 <html>
 
 <head>
-
     <title>Add Shiny Pokémon</title>
 
-    <!-- Connects this page to our CSS file -->
-    <link rel="stylesheet" href="/static/style.css">
-
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
 </head>
 
 <body>
 
-    <!-- Main container for the page -->
-    <div class="container">
+<div class="container">
 
-        <h1>✨ Add Shiny Pokémon ✨</h1>
+    <header class="header">
 
-        <!--
-            class="add-form"
-            This lets CSS style the entire form as a grid.
-        -->
-        <form method="POST" class="add-form">
+        <div>
+            <h1>✨ Add Shiny Pokémon</h1>
 
-            <!-- Pokémon Name -->
-            <div class="form-group">
+            <p>
+                Add a new shiny Pokémon to your collection.
+            </p>
+        </div>
 
-                <label for="name">Pokémon Name</label>
+        <a
+            href="/"
+            class="add-button"
+        >
+            ← Back Home
+        </a>
+
+    </header>
+
+
+    <form
+        method="POST"
+        class="add-form"
+    >
+
+        <!-- POKÉMON NAME -->
+
+        <div class="form-group">
+
+            <label for="name">
+                Pokémon Name
+            </label>
+
+            <div class="autocomplete">
 
                 <input
                     type="text"
                     id="name"
                     name="name"
+                    placeholder="Start typing a Pokémon..."
+                    autocomplete="off"
                     required
                 >
 
-            </div>
-
-            <!-- Game -->
-            <div class="form-group">
-
-                <label for="game">Game</label>
-
-                <select
-                    id="game"
-                    name="game"
-                    required
-                >
-
-                    <option value="">Select a Game</option>
-
-                    <!--
-                        Flask automatically creates one option
-                        for every game inside GAME_TO_GEN.
-                    -->
-                    {% for game in games %}
-
-                        <option value="{{ game }}">
-                            {{ game.title() }}
-                        </option>
-
-                    {% endfor %}
-
-                </select>
+                <div
+                    id="suggestions"
+                    class="suggestions"
+                ></div>
 
             </div>
 
-            <!-- Method -->
-            <div class="form-group">
+        </div>
 
-                <label for="method">Method</label>
 
-                <input
-                    type="text"
-                    id="method"
-                    name="method"
-                    placeholder="Masuda, Soft Reset, Sandwich..."
-                    required
-                >
+        <!-- GAME -->
 
-            </div>
+        <div class="form-group">
 
-            <!-- Date -->
-            <div class="form-group">
+            <label for="game">
+                Game
+            </label>
 
-                <label for="date">Date Caught</label>
+            <select
+                id="game"
+                name="game"
+                required
+            >
 
-                <input
-                    type="date"
-                    id="date"
-                    name="date"
-                    required
-                >
+                <option value="">
+                    Select a Game
+                </option>
 
-            </div>
+                {% for game in games %}
 
-            <!-- Submit Button -->
-            <button type="submit">
-                ✨ Add Shiny
-            </button>
+                    <option value="{{ game }}">
+                        {{ game.title() }}
+                    </option>
 
-        </form>
+                {% endfor %}
 
-        <br>
+            </select>
 
-        <a href="/">
-            ← Back Home
-        </a>
+        </div>
 
-    </div>
+
+        <!-- METHOD -->
+
+        <div class="form-group">
+
+            <label for="method">
+                Method
+            </label>
+
+            <input
+                type="text"
+                id="method"
+                name="method"
+                placeholder="Masuda, Soft Reset, Sandwich..."
+                required
+            >
+
+        </div>
+
+
+        <!-- DATE -->
+
+        <div class="form-group">
+
+            <label for="date">
+                Date Caught
+            </label>
+
+            <input
+                type="date"
+                id="date"
+                name="date"
+                required
+            >
+
+        </div>
+
+
+        <!-- SUBMIT -->
+
+        <button type="submit">
+            ✨ Add Shiny
+        </button>
+
+    </form>
+
+</div>
+
+
+<script>
+
+    // Store all Pokémon names
+    let pokemonNames = [];
+
+
+    // Load Pokémon names from our local JSON file
+    fetch("/static/pokemon_names.json")
+
+        .then(function(response) {
+
+            if (!response.ok) {
+                throw new Error(
+                    "Could not load pokemon_names.json"
+                );
+            }
+
+            return response.json();
+
+        })
+
+        .then(function(data) {
+
+            pokemonNames = data;
+
+            console.log(
+                "Pokémon loaded:",
+                pokemonNames.length
+            );
+
+        })
+
+        .catch(function(error) {
+
+            console.error(
+                "Could not load Pokémon names:",
+                error
+            );
+
+        });
+
+
+    // Get the input box
+    const input =
+        document.getElementById("name");
+
+
+    // Get the suggestions container
+    const suggestions =
+        document.getElementById("suggestions");
+
+
+    // Run whenever the user types
+    input.addEventListener(
+        "input",
+        function() {
+
+            const search =
+                input.value
+                    .toLowerCase()
+                    .trim();
+
+
+            // Clear old suggestions
+            suggestions.innerHTML = "";
+
+
+            // Don't show anything if input is empty
+            if (search === "") {
+                return;
+            }
+
+
+            // Find matching Pokémon
+            const matches =
+                pokemonNames
+                    .filter(function(pokemon) {
+
+                        return pokemon
+                            .toLowerCase()
+                            .includes(search);
+
+                    })
+                    .slice(0, 8);
+
+
+            // Create a suggestion for each match
+            matches.forEach(
+                function(pokemon) {
+
+                    const option =
+                        document.createElement("div");
+
+
+                    option.classList.add(
+                        "suggestion"
+                    );
+
+
+                    option.textContent =
+                        pokemon;
+
+
+                    // Click a suggestion
+                    option.addEventListener(
+                        "click",
+                        function() {
+
+                            input.value =
+                                pokemon;
+
+                            suggestions.innerHTML =
+                                "";
+
+                        }
+                    );
+
+
+                    suggestions.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    // Close suggestions when clicking elsewhere
+    document.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                !event.target.closest(
+                    ".autocomplete"
+                )
+            ) {
+
+                suggestions.innerHTML =
+                    "";
+
+            }
+
+        }
+    );
+
+</script>
 
 </body>
 
